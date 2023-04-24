@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-
+use dotenv::dotenv;
 use firebase_rs::*;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct User {
@@ -23,8 +23,10 @@ async fn main() {
         email: "ur.mum69@gmail.com".to_string(),
     };
 
-    let firebase =
-        Firebase::new("https://rust-project-6b1af-default-rtdb.firebaseio.com/").unwrap();
+    dotenv().ok();
+    let db_url = std::env::var("DB_URL").expect("DB_URL must be set.");
+
+    let firebase = Firebase::new(&db_url).unwrap();
 
     let response = set_user(&firebase, &user).await;
 
@@ -38,8 +40,8 @@ async fn main() {
     let updated_user = update_user(&firebase, &response.name, &user).await;
     println!("{:?}", updated_user);
 
-    delete_user(&firebase, &response.name).await;
-    println!("User deleted.")
+    // delete_user(&firebase, &response.name).await;
+    // println!("User deleted.")
 }
 
 async fn set_user(firebase_client: &Firebase, user: &User) -> Response {
@@ -67,10 +69,10 @@ async fn update_user(firebase_client: &Firebase, id: &String, user: &User) -> Us
     return string_to_user(&_user.unwrap().data);
 }
 
-async fn delete_user(firebase_client: &Firebase, id: &String) {
-    let firebase = firebase_client.at("users").at(&id);
-    let _result = firebase.delete().await;
-}
+// async fn delete_user(firebase_client: &Firebase, id: &String) {
+//     let firebase = firebase_client.at("users").at(&id);
+//     let _result = firebase.delete().await;
+// }
 
 // convert a string to a response
 fn string_to_response(s: &str) -> Response {
